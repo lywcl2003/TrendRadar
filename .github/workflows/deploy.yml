@@ -41,6 +41,20 @@ jobs:
         run: |
           python main.py
 
+      - name: Copy latest report to root
+        run: |
+          # 找到最新的汇总报告
+          LATEST_REPORT=$(find output -name "当日汇总.html" | head -1)
+          if [ -n "$LATEST_REPORT" ]; then
+            echo "找到最新报告: $LATEST_REPORT"
+            # 复制到根目录并重命名为index.html
+            cp "$LATEST_REPORT" output/index.html
+            echo "已将最新报告复制为 output/index.html"
+          else
+            echo "错误：未找到当日汇总报告"
+            exit 1
+          fi
+
       - name: Create .nojekyll file
         run: touch output/.nojekyll
 
