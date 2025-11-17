@@ -1,0 +1,58 @@
+name: Deploy TrendRadar to GitHub Pages
+
+on:
+  push:
+    branches: [ "master" ]  # 请注意：原项目默认分支可能是'master'
+  schedule:
+    - cron: '0 8,12,18 * * *'  # 每天8点、12点、18点运行
+  workflow_dispatch:  # 允许手动触发
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install Dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Run TrendRadar
+        env:
+          CRON_SCHEDULE: ${{ secrets.CRON_SCHEDULE }}
+          RUN_MODE: ${{ secrets.RUN_MODE }}
+          IMMEDIATE_RUN: ${{ secrets.IMMEDIATE_RUN }}
+          REPORT_MODE: ${{ secrets.REPORT_MODE }}
+        run: |
+          python main.py
+
+      # 创建一个特殊的 .nojekyll 文件，确保所有文件都能被正常提供[citation:2]
+      - name: Create .nojekyll file
+        run: touch output/.nojekyll
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v3
+
+      - name: Upload Artifact
+        uses: actions/upload-pages-artifact@v2
+        with:
+          path: 'output/'  # 上传output目录
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v2
