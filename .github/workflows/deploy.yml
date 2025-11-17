@@ -2,10 +2,10 @@ name: Deploy TrendRadar to GitHub Pages
 
 on:
   push:
-    branches: [ "master" ]  # 请注意：原项目默认分支可能是'master'
+    branches: [ "master" ]
   schedule:
-    - cron: '0 8,12,18 * * *'  # 每天8点、12点、18点运行
-  workflow_dispatch:  # 允许手动触发
+    - cron: '0 8,12,18 * * *'
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -41,18 +41,17 @@ jobs:
         run: |
           python main.py
 
-      # 创建一个特殊的 .nojekyll 文件，确保所有文件都能被正常提供[citation:2]
       - name: Create .nojekyll file
         run: touch output/.nojekyll
 
       - name: Setup Pages
-        uses: actions/configure-pages@v3
+        uses: actions/configure-pages@v4
 
       - name: Upload Artifact
-        uses: actions/upload-pages-artifact@v2
+        uses: actions/upload-pages-artifact@v3
         with:
-          path: 'output/'  # 上传output目录
+          path: 'output/'
 
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v2
+        uses: actions/deploy-pages@v4
