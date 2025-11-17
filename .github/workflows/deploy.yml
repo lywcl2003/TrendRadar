@@ -1,1 +1,48 @@
+name: Deploy to GitHub Pages
 
+on:
+  push:
+    branches: [ main ]
+  schedule:
+    - cron: '0 8,12,18 * * *'
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+        
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        
+    - name: Run TrendRadar
+      env:
+        CRON_SCHEDULE: ${{ secrets.CRON_SCHEDULE }}
+        RUN_MODE: ${{ secrets.RUN_MODE }}
+        IMMEDIATE_RUN: ${{ secrets.IMMEDIATE_RUN }}
+        REPORT_MODE: ${{ secrets.REPORT_MODE }}
+        # 添加其他你配置的secrets
+      run: |
+        python main.py
+        
+    - name: Setup Pages
+      uses: actions/configure-pages@v3
+      
+    - name: Upload artifact
+      uses: actions/upload-pages-artifact@v2
+      with:
+        path: ./output
+        
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v2
